@@ -2,11 +2,23 @@ env:
   CIRRUS_CLONE_DEPTH: 1
 
 freebsd_task:
-  freebsd_instance:
-    matrix:
-      image: freebsd-11-2-release-amd64
-      image: freebsd-12-1-release-amd64
-  install_script: pkg install -y git py27-yaml
+  matrix:
+    - name: 13.0-CURRENT
+      freebsd_instance:
+        image_family: freebsd-13-0-snap
+    - name: 12.2-STABLE
+      freebsd_instance:
+        image_family: freebsd-12-2-snap
+    - name: 12.1-RELEASE
+      freebsd_instance:
+        image_family: freebsd-12-1
+    - name: 11.4-RELEASE
+      freebsd_instance:
+        image_family: freebsd-11-4
+  install_script:
+    - sed -i.bak -e 's,pkg+http://pkg.FreeBSD.org/\${ABI}/quarterly,pkg+http://pkg.FreeBSD.org/\${ABI}/latest,' /etc/pkg/FreeBSD.conf
+    - ASSUME_ALWAYS_YES=yes pkg bootstrap -f
+    - pkg install -y git-lite py27-yaml
   script:
     - fetch http://tetworks.opengroup.org/downloads/38/software/Sources/3.8/tet3.8-src.tar.gz
     - tar -x -C test/tet -f tet3.8-src.tar.gz
